@@ -1,0 +1,10 @@
+team_name = "faa"
+client_name = "dgag"
+resource_group_name = "rg-faa-dgag-de-cacn-001"
+index = 1
+location = "canadacentral"
+environment = "de"
+extra_tags = { "partner_id" : "2d0cf995-cf63-49aa-9b9d-5091f32598c2"}
+counter = 1
+sku = "PerGB2018"
+retention_in_days = 30

@@ -1,0 +1,17 @@
+team_name = "faa"
+resource_name = "dgig-dataproduct"
+extra_tags = { "partner_id" : "2d0cf995-cf63-49aa-9b9d-5091f32598c2"}
+sec_subscription_id = "3e4379ca-0a98-4d37-8d24-a2b438411d74"
+resource_group_name = "rg-faa-dgig-dataproduct-de-cacn-001"
+location = "canadacentral"
+environment = "de"
+subnet_pep_id = "/subscriptions/97a2fbd5-0d85-419e-ae2c-99f6605b9b06/resourceGroups/lacdonnees-cacn-nprod-net-rg01/providers/Microsoft.Network/virtualNetworks/lacdonnees-cacn-nprod-vnet01/subnets/DEV_FAA_PEP"
+application_type = "other"
+log_analytics_workspace_log = "prd01-cacn-log-cguards01"
+log_analytics_workspace_metric = "log-faa-dgig-de-cacn-001"
+log_analytics_workspace_log_rg = "prd01-rgp-logging01"
+log_analytics_workspace_metric_rg = "rg-faa-dgig-devsecops-de-cacn-001"
+ai-ml_log_setting_name = "log2LogAnalytics"
+ai-ml_metric_setting_name = "metric2LogAnalytics"
+count = 1
+index = 1

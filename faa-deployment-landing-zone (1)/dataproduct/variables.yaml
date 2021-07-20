@@ -1,0 +1,70 @@
+variables:
+  de_backendServiceArm: sp-gtd-lacdonnees-nprod-01-devops
+  de_keyvault: dev-faa-devops-vault
+  de_env: de
+  de_backendAzureRmResourceGroupName: rg-saterra-de-caea
+  de_backendAzureRmStorageAccountName: saterradecaea
+  de_backendAzureRmContainerName: landing-zone-test
+
+  pp_backendServiceArm: sp-gtd-lacdonnees-nprod-01-devops
+  pp_backendAzureRmResourceGroupName: rg-saterra-pp-caea
+  pp_backendAzureRmStorageAccountName: saterrappcaea
+  pp_backendAzureRmContainerName: landing-zone-test
+  pp_keyvault: pre-faa-devops-vault
+  pp_env: pp
+
+  pr_backendServiceArm: sp-gtd-lacdonnees-prod-01-devops
+  pr_backendAzureRmResourceGroupName: rg-saterra-pr-caea
+  pr_backendAzureRmStorageAccountName: saterraprcaea
+  pr_backendAzureRmContainerName: landing-zone0test
+  pr_keyvault: prd-faa-devops-vault
+  pr_env: pr
+
+  de_rg_backendAzureRmKey: landingzone-totalloss-rg-de.tfstate
+  pp_rg_backendAzureRmKey: landingzone-totalloss-rg-pp.tfstate
+  pr_rg_backendAzureRmKey: landingzone-totalloss-rg-pr.tfstate
+  rgModuleRepo: faa-tf-module-rg
+  rgModuleName: resourceGroup
+  rgDeployArtifactName: rg_deploy
+
+  de_sqlsrv_backendAzureRmKey: landingzone-totalloss-sqlsrv-de.tfstate
+  pp_sqlsrv_backendAzureRmKey: landingzone-totalloss-sqlsrv-pp.tfstate
+  pr_sqlsrv_backendAzureRmKey: landingzone-totalloss-sqlsrv-pr.tfstate
+  sqlsrvModuleRepo: faa-tf-module-sqlsrv
+  sqlsrvModuleName: sqlServer
+  sqlsrvDeployArtifactName: sqlsrv_deploy
+  
+
+  de_aml_backendAzureRmKey: landingzone-totalloss-aml-de.tfstate
+  pp_aml_backendAzureRmKey: landingzone-totalloss-aml-pp.tfstate
+  pr_aml_backendAzureRmKey: landingzone-totalloss-aml-pr.tfstate
+  amlModuleRepo: faa-tf-aml
+  amlModuleName: azureML
+  amlDeployArtifactName: azureml_deploy
+
+  poolName: Default
+  #vmImage: vs2017-win2016
+  vmImage: ubuntu-18.04
+  projectName: Fondation
+  currentRepo: faa-aml-pipelines
+  pipelineName: dataproduct
+  localFileName: locals.tf
+  moduleRepo: faa-tf-aml
+  deployArtifactName: aml_deploy
+  #repos:
+  #  - "faa-tf-common-files"
+  #  - "faa-tf-module-adls"
+  #  - faa-tf-module-pep
+  #  - faa-tf-module-kv
+  #  - faa-tf-module-appinsight
+  #  - faa-tf-module-acr
+  #  - faa-tf-module-aml
+  #  - faa-aml-pipelines
+  #copyRepos:
+  #  - faa-tf-module-adls
+  #  - faa-tf-module-pep
+  #  - faa-tf-module-kv
+  #  - faa-tf-module-appinsight
+  #  - faa-tf-module-acr
+  #  - faa-tf-module-aml
+  #  - faa-aml-pipelines

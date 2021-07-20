@@ -1,0 +1,35 @@
+variables:
+  de_backendServiceArm: sp-gtd-lacdonnees-nprod-01-devops
+  de_backendAzureRmResourceGroupName: rg-saterra-de-caea
+  de_backendAzureRmStorageAccountName: saterradecaea
+  de_backendAzureRmContainerName: landing-zone
+  de_keyvault: dev-faa-devops-vault
+  de_env: de
+
+  pp_backendServiceArm: sp-gtd-lacdonnees-nprod-01-devops
+  pp_backendAzureRmResourceGroupName: rg-saterra-pp-caea
+  pp_backendAzureRmStorageAccountName: saterrappcaea
+  pp_backendAzureRmContainerName: landing-zone
+  pp_keyvault: pre-faa-devops-vault
+  pp_env: pp
+
+  pr_backendServiceArm: sp-gtd-lacdonnees-prod-01-devops
+  pr_backendAzureRmResourceGroupName: rg-saterra-pr-caea
+  pr_backendAzureRmStorageAccountName: saterraprcaea
+  pr_backendAzureRmContainerName: landing-zone
+  pr_keyvault: prd-faa-devops-vault
+  pr_env: pr
+
+  de_rg_backendAzureRmKey: landingzone-datalake-rg-de.tfstate
+  pp_rg_backendAzureRmKey: landingzone-datalake-rg-pp.tfstate
+  pr_rg_backendAzureRmKey: landingzone-datalake-rg-pr.tfstate
+
+  de_adls_backendAzureRmKey: landingzone-datalake-adls-de.tfstate
+  pp_adls_backendAzureRmKey: landingzone-datalake-adls-pp.tfstate
+  pr_adls_backendAzureRmKey: landingzone-datalake-adls-pr.tfstate
+
+  poolName: Default
+  vmImage: vs2017-win2016
+  projectName: Fondation
+  currentRepo: faa-deployment-landing-zone
+  pipelineName: datalake

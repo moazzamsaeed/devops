@@ -1,0 +1,361 @@
+name: dataproduct-totalLoss-deployment
+
+variables:
+  - template: variables.yaml
+
+resources:
+ repositories:
+   - repository: faa-tf-module-pep
+     name: Fondation/faa-tf-module-pep
+     ref: refs/heads/features/nicholas/faa-432_add_adls_pipeline
+     type: git
+   - repository: faa-tf-common-files
+     name: Fondation/faa-tf-common-files
+     type: git
+   - repository: faa-tf-module-rg
+     name: Fondation/faa-tf-module-rg
+     type: git
+   - repository: faa-tf-module-sqlsrv
+     name: Fondation/faa-tf-module-sqlsrv
+     type: git
+   - repository: faa-tf-module-kv
+     name: Fondation/faa-tf-module-kv
+     type: git
+   - repository: faa-tf-module-appinsight
+     name: Fondation/faa-tf-module-appinsight
+     ref: refs/heads/features/mohitBansal/faa-413_deploy_dataproduct
+     type: git
+   - repository: faa-tf-aml
+     name: Fondation/faa-tf-aml
+     #ref: '$(Build.SourceBranch)'
+     ref: refs/heads/features/mohitBansal/faa-413_deploy_dataproduct
+     type: git
+   - repository: faa-tf-module-adls
+     name: Fondation/faa-tf-module-adls
+     ref: refs/heads/features/nicholas/faa-432_add_adls_pipeline
+     type: git
+   - repository: faa-template
+     name: Fondation/faa-template
+     ref: refs/heads/features/mohitBansal/faa-413_deploy_dataproduct
+     type: git
+   - repository: faa-deployment-landing-zone
+     name: Fondation/faa-deployment-landing-zone
+     ref: '$(Build.SourceBranch)'
+     type: git
+
+stages:
+- stage: rg_build
+  jobs:
+  - template: /pipeline.build.yaml@faa-template
+    parameters:
+      moduleName: '${{ variables.rgModuleName }}'
+      workingDirectory: '$(Agent.BuildDirectory)/${{ variables.rgModuleRepo }}/'
+      dependsOn: ''
+      condition: ''
+      moduleRepo: ${{ variables.rgModuleRepo }}
+      poolName: ${{ variables.poolName }}
+      vmImage: ${{ variables.vmImage }}
+      projectName: ${{ variables.projectName }}
+      currentRepo: ${{ variables.currentRepo }}
+      copyRepos:
+        - faa-tf-module-pep
+        - faa-tf-module-rg
+      repos: 
+        - faa-tf-common-files
+        - faa-tf-module-pep
+        - faa-tf-module-rg
+        - faa-deployment-landing-zone
+        - faa-template
+     # branchName: master
+      pipelineName: ${{ variables.pipelineName }}
+      ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+        backendServiceArm: '${{ variables.pp_backendServiceArm }}'
+        backendAzureRmResourceGroupName: '${{ variables.pp_backendAzureRmResourceGroupName }}'
+        backendAzureRmStorageAccountName: '${{ variables.pp_backendAzureRmStorageAccountName }}'
+        backendAzureRmContainerName: '${{ variables.pp_backendAzureRmContainerName }}'
+        backendAzureRmKey: '${{ variables.pp_rg_backendAzureRmKey }}'
+        keyvault: '${{ variables.pp_keyvault }}'
+        env: '${{ variables.pp_env }}'
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features') }}:
+        backendServiceArm: ${{ variables.de_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.de_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.de_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.de_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.de_rg_backendAzureRmKey }}
+        keyvault: ${{ variables.de_keyvault }}
+        env: ${{ variables.de_env }}
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases') }}:
+        backendServiceArm: ${{ variables.pr_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.pr_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.pr_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.pr_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.pr_rg_backendAzureRmKey }}
+        keyvault: ${{ variables.pr_keyvault }}
+        env: ${{ variables.pr_env }}
+
+  
+- stage : rg_deploy
+  dependsOn: rg_build
+  jobs:
+  - template: /pipeline.deploy.yaml@faa-template
+    parameters:
+      moduleName: '${{ variables.rgModuleName }}'
+      workingDirectory: '$(Agent.BuildDirectory)/${{ variables.rgModuleRepo }}/'
+      dependsOn: ''
+      condition: ''
+      poolName: ${{ variables.poolName }}
+      vmImage: ${{ variables.vmImage }}
+      projectName: ${{ variables.projectName }}
+      currentRepo: ${{ variables.currentRepo }}
+      deployArtifactName: ${{ variables.rgDeployArtifactName }}
+      moduleRepo: ${{ variables.rgModuleRepo }}
+      copyRepos:
+        - faa-tf-module-pep
+        - faa-tf-module-rg
+      repos: 
+        - faa-tf-common-files
+        - faa-tf-module-pep
+        - faa-tf-module-rg
+        - faa-deployment-landing-zone
+        - faa-template
+      #branchName: master
+      pipelineName: ${{ variables.pipelineName }}
+      ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+        backendServiceArm: '${{ variables.pp_backendServiceArm }}'
+        backendAzureRmResourceGroupName: '${{ variables.pp_backendAzureRmResourceGroupName }}'
+        backendAzureRmStorageAccountName: '${{ variables.pp_backendAzureRmStorageAccountName }}'
+        backendAzureRmContainerName: '${{ variables.pp_backendAzureRmContainerName }}'
+        backendAzureRmKey: '${{ variables.pp_rg_backendAzureRmKey }}'
+        keyvault: '${{ variables.pp_keyvault }}'
+        env: '${{ variables.pp_env }}'
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features') }}:
+        backendServiceArm: ${{ variables.de_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.de_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.de_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.de_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.de_rg_backendAzureRmKey }}
+        keyvault: ${{ variables.de_keyvault }}
+        env: ${{ variables.de_env }}
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases') }}:
+        backendServiceArm: ${{ variables.pr_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.pr_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.pr_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.pr_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.pr_rg_backendAzureRmKey }}
+        keyvault: ${{ variables.pr_keyvault }}
+        env: ${{ variables.pr_env }}
+
+- stage: sqlsrv_build
+  dependsOn: rg_deploy
+  jobs:
+  - template: /pipeline.build.yaml@faa-template
+    parameters:
+      moduleName: '${{ variables.sqlsrvModuleName }}'
+      workingDirectory: '$(Agent.BuildDirectory)/${{ variables.sqlsrvModuleRepo }}/'
+      dependsOn: ''
+      condition: ''
+      moduleRepo: ${{ variables.sqlsrvModuleRepo }}
+      poolName: ${{ variables.poolName }}
+      vmImage: ${{ variables.vmImage }}
+      projectName: ${{ variables.projectName }}
+      currentRepo: ${{ variables.currentRepo }}
+      copyRepos:
+        - faa-tf-module-pep
+        - faa-tf-module-sqlsrv
+      repos: 
+        - faa-tf-common-files
+        - faa-tf-module-pep
+        - faa-tf-module-sqlsrv
+        - faa-deployment-landing-zone
+        - faa-template
+     # branchName: master
+      pipelineName: ${{ variables.pipelineName }}
+      ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+        backendServiceArm: '${{ variables.pp_backendServiceArm }}'
+        backendAzureRmResourceGroupName: '${{ variables.pp_backendAzureRmResourceGroupName }}'
+        backendAzureRmStorageAccountName: '${{ variables.pp_backendAzureRmStorageAccountName }}'
+        backendAzureRmContainerName: '${{ variables.pp_backendAzureRmContainerName }}'
+        backendAzureRmKey: '${{ variables.pp_sqlsrv_backendAzureRmKey }}'
+        keyvault: '${{ variables.pp_keyvault }}'
+        env: '${{ variables.pp_env }}'
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features') }}:
+        backendServiceArm: ${{ variables.de_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.de_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.de_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.de_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.de_sqlsrv_backendAzureRmKey }}
+        keyvault: ${{ variables.de_keyvault }}
+        env: ${{ variables.de_env }}
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases') }}:
+        backendServiceArm: ${{ variables.pr_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.pr_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.pr_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.pr_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.pr_sqlsrv_backendAzureRmKey }}
+        keyvault: ${{ variables.pr_keyvault }}
+        env: ${{ variables.pr_env }}
+
+  
+- stage : sqlsrv_deploy
+  dependsOn: sqlsrv_build
+  jobs:
+  - template: /pipeline.deploy.yaml@faa-template
+    parameters:
+      moduleName: '${{ variables.sqlsrvModuleName }}'
+      workingDirectory: '$(Agent.BuildDirectory)/${{ variables.sqlsrvModuleRepo }}/'
+      dependsOn: ''
+      condition: ''
+      poolName: ${{ variables.poolName }}
+      vmImage: ${{ variables.vmImage }}
+      projectName: ${{ variables.projectName }}
+      currentRepo: ${{ variables.currentRepo }}
+      deployArtifactName: ${{ variables.sqlsrvDeployArtifactName }}
+      moduleRepo: ${{ variables.sqlsrvModuleRepo }}
+      copyRepos:
+        - faa-tf-module-pep
+        - faa-tf-module-sqlsrv
+      repos: 
+        - faa-tf-common-files
+        - faa-tf-module-pep
+        - faa-tf-module-sqlsrv
+        - faa-deployment-landing-zone
+        - faa-template
+      #branchName: master
+      pipelineName: ${{ variables.pipelineName }}
+      ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+        backendServiceArm: '${{ variables.pp_backendServiceArm }}'
+        backendAzureRmResourceGroupName: '${{ variables.pp_backendAzureRmResourceGroupName }}'
+        backendAzureRmStorageAccountName: '${{ variables.pp_backendAzureRmStorageAccountName }}'
+        backendAzureRmContainerName: '${{ variables.pp_backendAzureRmContainerName }}'
+        backendAzureRmKey: '${{ variables.pp_aml_backendAzureRmKey }}'
+        keyvault: '${{ variables.pp_keyvault }}'
+        env: '${{ variables.pp_env }}'
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features') }}:
+        backendServiceArm: ${{ variables.de_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.de_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.de_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.de_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.de_aml_backendAzureRmKey }}
+        keyvault: ${{ variables.de_keyvault }}
+        env: ${{ variables.de_env }}
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases') }}:
+        backendServiceArm: ${{ variables.pr_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.pr_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.pr_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.pr_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.pr_aml_backendAzureRmKey }}
+        keyvault: ${{ variables.pr_keyvault }}
+        env: ${{ variables.pr_env }}
+
+- stage: aml_build
+  dependsOn: rg_deploy
+  jobs:
+  - template: /pipeline.build.yaml@faa-template
+    parameters:
+      moduleName: '${{ variables.amlModuleName }}'
+      workingDirectory: '$(Agent.BuildDirectory)/${{ variables.amlModuleRepo }}/'
+      dependsOn: ''
+      condition: ''
+      moduleRepo: ${{ variables.amlModuleRepo }}
+      poolName: ${{ variables.poolName }}
+      vmImage: ${{ variables.vmImage }}
+      projectName: ${{ variables.projectName }}
+      currentRepo: ${{ variables.currentRepo }}
+      copyRepos:
+        - faa-tf-module-pep
+        - faa-tf-module-adls
+        - faa-tf-module-kv
+        - faa-tf-module-appinsight
+        - faa-tf-aml
+      repos: 
+        - faa-tf-common-files
+        - faa-tf-module-pep
+        - faa-tf-module-adls
+        - faa-tf-module-kv
+        - faa-tf-module-appinsight
+        - faa-tf-aml
+        - faa-template
+        - faa-deployment-landing-zone
+     # branchName: master
+      pipelineName: ${{ variables.pipelineName }}
+      ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+        backendServiceArm: '${{ variables.pp_backendServiceArm }}'
+        backendAzureRmResourceGroupName: '${{ variables.pp_backendAzureRmResourceGroupName }}'
+        backendAzureRmStorageAccountName: '${{ variables.pp_backendAzureRmStorageAccountName }}'
+        backendAzureRmContainerName: '${{ variables.pp_backendAzureRmContainerName }}'
+        backendAzureRmKey: '${{ variables.pp_aml_backendAzureRmKey }}'
+        keyvault: '${{ variables.pp_keyvault }}'
+        env: '${{ variables.pp_env }}'
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features') }}:
+        backendServiceArm: ${{ variables.de_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.de_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.de_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.de_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.de_aml_backendAzureRmKey }}
+        keyvault: ${{ variables.de_keyvault }}
+        env: ${{ variables.de_env }}
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases') }}:
+        backendServiceArm: ${{ variables.pr_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.pr_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.pr_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.pr_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.pr_aml_backendAzureRmKey }}
+        keyvault: ${{ variables.pr_keyvault }}
+        env: ${{ variables.pr_env }}
+
+  
+- stage : aml_deploy
+  dependsOn: aml_build
+  jobs:
+  - template: /pipeline.deploy.yaml@faa-template
+    parameters:
+      moduleName: '${{ variables.amlModuleName }}'
+      workingDirectory: '$(Agent.BuildDirectory)/${{ variables.amlModuleRepo }}/'
+      dependsOn: ''
+      condition: ''
+      poolName: ${{ variables.poolName }}
+      vmImage: ${{ variables.vmImage }}
+      projectName: ${{ variables.projectName }}
+      currentRepo: ${{ variables.currentRepo }}
+      deployArtifactName: ${{ variables.deployArtifactName }}
+      moduleRepo: ${{ variables.amlModuleRepo }}
+      copyRepos:
+        - faa-tf-module-pep
+        - faa-tf-module-adls
+        - faa-tf-module-kv
+        - faa-tf-module-appinsight
+        - faa-tf-aml
+      repos: 
+        - faa-tf-common-files
+        - faa-tf-module-pep
+        - faa-tf-module-adls
+        - faa-tf-module-kv
+        - faa-tf-module-appinsight
+        - faa-tf-aml
+        - faa-deployment-landing-zone
+      #branchName: master
+      pipelineName: ${{ variables.pipelineName }}
+      ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+        backendServiceArm: '${{ variables.pp_backendServiceArm }}'
+        backendAzureRmResourceGroupName: '${{ variables.pp_backendAzureRmResourceGroupName }}'
+        backendAzureRmStorageAccountName: '${{ variables.pp_backendAzureRmStorageAccountName }}'
+        backendAzureRmContainerName: '${{ variables.pp_backendAzureRmContainerName }}'
+        backendAzureRmKey: '${{ variables.pp_aml_backendAzureRmKey }}'
+        keyvault: '${{ variables.pp_keyvault }}'
+        env: '${{ variables.pp_env }}'
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/features') }}:
+        backendServiceArm: ${{ variables.de_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.de_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.de_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.de_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.de_aml_backendAzureRmKey }}
+        keyvault: ${{ variables.de_keyvault }}
+        env: ${{ variables.de_env }}
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/releases') }}:
+        backendServiceArm: ${{ variables.pr_backendServiceArm }}
+        backendAzureRmResourceGroupName: ${{ variables.pr_backendAzureRmResourceGroupName }}
+        backendAzureRmStorageAccountName: ${{ variables.pr_backendAzureRmStorageAccountName }}
+        backendAzureRmContainerName: ${{ variables.pr_backendAzureRmContainerName }}
+        backendAzureRmKey: ${{ variables.pr_aml_backendAzureRmKey }}
+        keyvault: ${{ variables.pr_keyvault }}
+        env: ${{ variables.pr_env }}
